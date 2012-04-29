@@ -7,6 +7,8 @@ var endTime = function (time, expr) {
         switch (expr.tag) {
         case "note":
             return expr.dur;
+        case "rest":
+            return expr.dur;
         case "seq":
             return duration(expr.left) + duration(expr.right);
         case "par":
@@ -14,8 +16,6 @@ var endTime = function (time, expr) {
             var r = duration(expr.right);
             return l > r ? l : r;
         }
-        if (expr.tag === 'note')
-            return expr.dur;
     }
     return time + duration(expr);
 };
@@ -38,6 +38,12 @@ var compile = function (musexpr) {
                 start: start, dur: endTime(start, expr) - start
             });
             break;
+        case "rest":
+            result.push({
+                tag: "rest",
+                start: start, dur: endTime(start, expr) - start
+            });
+            break;
         }
     }
     walk(0, musexpr);
@@ -52,7 +58,10 @@ var melody_mus = {
         right: { tag: 'note', pitch: 'b4', dur: 250 } },
     right: {
         tag: 'seq',
-        left: { tag: 'note', pitch: 'c4', dur: 500 },
+        left: {
+            tag: 'seq',
+            left: { tag: 'note', pitch: 'c4', dur: 500 },
+            right: { tag: 'rest', dur: 100}},
         right: { tag: 'note', pitch: 'd4', dur: 500 } } };
 
 console.log(melody_mus);
